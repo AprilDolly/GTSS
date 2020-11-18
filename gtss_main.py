@@ -1,6 +1,6 @@
 #!bin/python3.6
 
-#Please don't scroll down...............
+#Please don't scroll down if you value cleanliness
 
 
 
