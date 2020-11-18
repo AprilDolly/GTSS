@@ -15,3 +15,5 @@ Note 1: mute
 Note 3: tap
 These can be changed in the configuration menu.
 If you are confused about how this works, examine example.mid in your midi sequencer, and try to render a guitar track from it.
+
+If you have any problems, send an email to aprildolly@mail.com or message u/aprildoll on Reddit.
