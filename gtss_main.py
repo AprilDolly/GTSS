@@ -1,6 +1,6 @@
 #!bin/python3.6
 
-#Please don't scroll down if you value cleanliness
+#Please don't scroll down...............
 
 
 
@@ -68,8 +68,6 @@ if __name__=='__main__':
             dat.pitchchange += dat.tuning_correction
         if dat.pitchchange != 0.0:
             newdata = ShiftPitch(np.array(newdata),dat.pitchchange)
-            print('newdata',newdata[0])
-        
         if normalize_to_velocity:
             newdata=newdata/np.linalg.norm(newdata)*(dat.velocity/127)*normalized_coef
         else:
@@ -355,6 +353,7 @@ if __name__=='__main__':
                 
                 if lastNote != None:
                     dif = note.start - lastNote.end
+                    print(dif)
                     #print(dif)
                     #print(lastNote)
                 newSamples = []
@@ -366,12 +365,26 @@ if __name__=='__main__':
                     #list of tuples (sample.path,sample.start)
                     blacklist.append(   (newSample.path,note.start)   )
                 currentFretMode=None
+                start_point=int(note.start*float(sr))
                 if dif > 0.:
                     arlen = int(1+dif*float(sr))
                     filler = np.zeros(arlen,dtype=int)
                     for i in range(dupecount):
 
                         waves[i] = np.concatenate((waves[i],filler))
+                    for i in range(dupecount):
+                        correct=False
+                        start_point=int(note.start*float(sr))
+                        while correct==False:
+                            wlen=len(waves[i])
+                            if wlen < start_point-1:
+                                print('peepeepoopoo')
+                                waves[i]=np.concatenate((waves[i],np.zeros(1,dtype=int)))
+                            else:
+                                print('yyayy!')
+                                correct=True
+                for i in range(dupecount):      
+                    waves[i]=waves[i][0:start_point]
                         
                             
                 
