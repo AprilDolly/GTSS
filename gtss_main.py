@@ -15,15 +15,20 @@ import fuckit
 from audio_features import*
 import sample_selector
 from sample_selector import SampleSelector
+from sklearn.preprocessing import normalize
 from sklearn.linear_model import LinearRegression
 from shift_pitch import *
 from random import randrange
+import soundfile
+import time
 
 from pydub import AudioSegment
 from pydub import effects
 
 from midi_preprocess import *
 from gtss_psg import*
+
+from matplotlib import pyplot as plt
 
 
 
@@ -46,34 +51,62 @@ if __name__=='__main__':
     sampleset_directory='guitar_samples'
 
 
-
+    STARTS={}
+    iSTART=0
     #GuitarSample object represents a single sample. Constructed as samples are read in the IndexAllSamples method.
     #New temporary attributes may be given to the sample objects in other functions.
+    def add_arrays(arrays,data_type=float):
+        out=np.array([0],dtype=data_type)
+        for ar in arrays:
+            #print(ar)
+            ldif=len(ar)-len(out)
+            if ldif>0:
+                out = np.concatenate((out,np.zeros(ldif,dtype=data_type)))
+            elif ldif < 0:
+                ar=np.concatenate((ar,np.zeros(-1*ldif,dtype=data_type)))
+            out += ar
+        return out
     class GuitarSample(object):
         pass
 
     #def SetAmplitude(sound,)
-
+    def match_target_amplitude(sound, target_dBFS):
+        change_in_dBFS = target_dBFS - sound.dBFS
+        return sound.apply_gain(change_in_dBFS)
     #Concatenates a guitar sample to the rest of the output
-    def AddWav(dat,wavToAppend,normalize_to_velocity=False,normalized_coef=100):
-        wavefile = AudioSegment.from_file(dat.path)
+    def AddWav(dat,wavToAppend,normalize_to_velocity=True,normalized_coef=0.005):
+
+        wavefile=AudioSegment.from_file(dat.path)
         sampleLen = int(dat.newlength*wavefile.frame_rate)
         atkAdjustment = int(dat.attackchange*wavefile.frame_rate)
         #newdata=wavefile.data[0:sampleLen]
-        wavefile=effects.normalize(wavefile)
-        newdata=wavefile.get_array_of_samples()[atkAdjustment:sampleLen+atkAdjustment]
+        #wavefile=wavefile.apply_gain(-50)#effects.normalize(wavefile)
+        #wavefile=match_target_amplitude(wavefile,-70.)
+        newdata=np.array(wavefile.get_array_of_samples()[atkAdjustment:sampleLen+atkAdjustment],dtype=float)
+        newdata=normalize(newdata.reshape(1,-1),norm='max').ravel()
+        #print(newdata)
+
         
-        #print(dat)
+        start_pos=int(dat.start*float(wavefile.frame_rate))
+        
+        #print(wavefile.frame_rate)
         if dat.fallback:
             dat.pitchchange += dat.tuning_correction
         if dat.pitchchange != 0.0:
-            newdata = ShiftPitch(np.array(newdata),dat.pitchchange)
+            newdata = ShiftPitch(newdata,dat.pitchchange)
         if normalize_to_velocity:
             newdata=newdata/np.linalg.norm(newdata)*(dat.velocity/127)*normalized_coef
         else:
-            pass#newdata=newdata/np.linalg.norm(newdata)*normalized_coef
-            
-        output= np.concatenate((wavToAppend,newdata))
+            pass
+        #print(newdata)
+        newdata=np.concatenate((np.zeros(start_pos,dtype=float),newdata))
+        try:
+            len(wavToAppend)
+        except:
+            wavToAppend=np.zeros(len(newdata),dtype=float)
+        #print('wavToAppend:{}\nnewdata:{}'.format(wavToAppend,newdata))
+        output=add_arrays([wavToAppend,newdata])
+        #print(output)
         return output
 
     #Returns the length of a note
@@ -158,7 +191,7 @@ if __name__=='__main__':
                         if np.abs(newsample.tuning_correction) > 0.6:
                             newsample.tuning_correction=0.0
                         #print(fn,newsample.cfd)
-                        print(newsample.tuning_correction,newsample.path)
+                        #print(newsample.tuning_correction,newsample.path)
                         samplesIndex.append(newsample)
                         #print(newsample)
                         atkLenData[0].append(newsample.length)
@@ -254,7 +287,6 @@ if __name__=='__main__':
             target_inst=midfile.instruments[0]
             found=False
             
-        
         if len(midfile.instruments) == 1 or found==True:
             #all_voices will contain all the midi voices, as well as the keyswitch.
             all_voices = PrettyMIDI()
@@ -268,6 +300,7 @@ if __name__=='__main__':
             voice_generation_finished = False
             vi = 0
             while voice_generation_finished == False:
+                #print('unfinished')
                 for note in currentSeq:
                     
                     #note.pitch += pa
@@ -276,35 +309,24 @@ if __name__=='__main__':
                             note.start -= ksw_shift
                             note.end -= ksw_shift
                         thisVoice.notes.append(note)
-                    elif last_note == None:
-                        #first note in the sequence
-                        thisVoice.notes.append(note)
-                        last_note = note
-                    elif last_note.end > note.start:
-                        #note overlaps, add to next voice
-                        leftoverNotes.notes.append(note)
                     else:
-                        #note does not overlap, add to first voice
+                        #add to first voice
                         thisVoice.notes.append(note)
                         last_note = note
                     #print(note.start,note.pitch)
                 #print(len(thisVoice.notes))
                 if len(thisVoice.notes) > 0:
                     thisVoice.notes = sorted(thisVoice.notes,key=lambda v: v.start)
-                    #print(thisVoice.notes)
-                    all_voices.instruments.append(thisVoice)
-                    #print(leftoverNotes.notes)
+                    return thisVoice
+
                 else:
                     
                     
                     voice_generation_finished = True
+                    return thisVoice
                 vi += 1
                 last_note = None
-                thisVoice = Instrument(vi)
-                currentSeq = leftoverNotes.notes
-                leftoverNotes = Instrument(vi+1)
             #all_voices.write('last_voices.mid')
-            return all_voices
 
 
     #Finds a sample appropriate for a given midi note, etc.
@@ -336,6 +358,7 @@ if __name__=='__main__':
         
         #select samples and concatenate wave
         for note in voice.notes:
+            
             #print(note.pitch)
             #print('hi')
             if note.pitch in ksw['pickmode']:
@@ -350,10 +373,12 @@ if __name__=='__main__':
                     if waves == []:
                         for i in range(dupecount):
                             waves.append(  np.array([0]*int(1+note.start*float(sr)))  )
+                            print('waves',waves)
+                            
                 
                 if lastNote != None:
                     dif = note.start - lastNote.end
-                    print(dif)
+                    #print(dif)
                     #print(dif)
                     #print(lastNote)
                 newSamples = []
@@ -365,35 +390,16 @@ if __name__=='__main__':
                     #list of tuples (sample.path,sample.start)
                     blacklist.append(   (newSample.path,note.start)   )
                 currentFretMode=None
-                start_point=int(note.start*float(sr))
-                if dif > 0.:
-                    arlen = int(1+dif*float(sr))
-                    filler = np.zeros(arlen,dtype=int)
-                    for i in range(dupecount):
-
-                        waves[i] = np.concatenate((waves[i],filler))
-                    for i in range(dupecount):
-                        correct=False
-                        start_point=int(note.start*float(sr))
-                        while correct==False:
-                            wlen=len(waves[i])
-                            if wlen < start_point-1:
-                                print('peepeepoopoo')
-                                waves[i]=np.concatenate((waves[i],np.zeros(1,dtype=int)))
-                            else:
-                                print('yyayy!')
-                                correct=True
-                for i in range(dupecount):      
-                    waves[i]=waves[i][0:start_point]
-                        
-                            
-                
                 lastSample = newSample
                 lastNote = note
                 lastPitch = note.pitch
                 for i in range(dupecount):
+                    #print('waves[i] before: ',waves[i])
                     waves[i] = AddWav(newSamples[i],waves[i])
+                    #print('waves[i] after: ',waves[i])
                 iNote += 1
+                
+        #print(voice.notes)
         return waves
             
                 
@@ -405,30 +411,20 @@ if __name__=='__main__':
             wavename += '_{}'.format(inst)
         wavename+='.wav'
         mid = PrettyMIDI(midifile)
-        voices = GenerateVoices(mid,inst,pa=pitch_adjust,ksw_table=ksw)
+        voice = GenerateVoices(mid,inst,pa=pitch_adjust,ksw_table=ksw)
         waves = []
-        for inst in voices.instruments:
-            
-            wav_dupes = WavFromVoice(inst,dupecount,wavfiledata=dataset)
-            waves.append(wav_dupes)
-        wave_finals=[]
-        for i in range(dupecount):
-            wave_finals.append( np.array([0]) )
-        for i in range(dupecount):
-            if i > 0:
-                name,ext = os.path.splitext(wavename)
-                wavename=name+'-{}{}'.format(i+1,ext)
-            for wavedupes in waves:
-                if len(wavedupes[i]) > len(wave_finals[i]):
-                    wave_finals[i].resize(wavedupes[i].shape)
-                    
-                else:
-                    wavedupes[i] = np.resize(wavedupes[i],wave_finals[i].shape)
-                wave_finals[i] = wave_finals[i] + wavedupes[i]
-            if os.path.exists(wavename):
+
+        wav_dupes = WavFromVoice(voice,dupecount,wavfiledata=dataset)
+        print('wav_dupes: {}'.format(wav_dupes))
+        waves.append(wav_dupes)
+        
+        for i,w in enumerate(wav_dupes):
+            if clip_num > 0:
                 name,ext = os.path.splitext(wavename)
                 wavename=name+'-{}{}'.format(clip_num+1,ext)
-            wavio.write(wavename,wave_finals[i],44100,sampwidth=2)
+            wavio.write(wavename,w,44100,sampwidth=2)
+            print('wrote {}'.format(wavename))
+            
 
 
     #RenderGuitarFromMidi(input('Enter the name of the source midi file: '),input('Enter desired wave file name: '))
@@ -438,10 +434,18 @@ if __name__=='__main__':
         ATTACK_CUT=attack_cut
         name,ext=os.path.splitext(midi_file_name)
         mid = PrettyMIDI(midi_file_name)
-
-        if len(mid.instruments)==1:
-            instnames=[mid.instruments[0].name]
-        for i in range(len(instnames)):
-            instname=instnames[i]
+        print('instnames: {}'.format(instnames))
+        for i,instname in enumerate(instnames):
+            #print('-----------------------------------------------------------------------------------------------------------INVOKING')
             RenderGuitarFromMidi(name,name,i,inst=instname,pitch_adjust=pitch_shift,dupecount=1,ksw=ksw_table)
+            print('inst: {}'.format(instname))
+        print('EXIT')
 main_gui(RenderMultipleTracks)
+debug_samples=False
+add=np.array([0],dtype=float)
+if debug_samples:
+    for s in SAMPLES_INDEX:
+        wavefile = AudioSegment.from_file(s.path)
+        newdata=np.array(wavefile.get_array_of_samples())
+        add =add_arrays([add,newdata])
+#print(add.shape)
