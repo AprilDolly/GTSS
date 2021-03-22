@@ -11,7 +11,7 @@ def PowerChordSubstitution(inst,kswtable):
                 #power chord
                 proceed=True
                 for note in newNotes:
-                    if note.pitch == note1.pitch or note2.pitch and note.pitch==note1.start:
+                    if (note.pitch == note1.pitch or note2.pitch and note.pitch==note1.start) and (not note.pitch in kswtable):
                         proceed=False
                 if proceed:
                     newNotes.append(Note(127,3,note1.start,note1.end))
