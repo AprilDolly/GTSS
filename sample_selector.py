@@ -56,7 +56,7 @@ def SampleSelector(note,pick_mode,fret_mode,lastPitch,wft,last_sample,samples_da
                         else:
                             ok=False
                             
-                    if max_cfd_threshold > 0:
+                    if max_cfd_threshold > 0 and use_fallback==False:
                         if last_sample.pitch==note.pitch:
                             brightness_ok = abs(wave.avg_centroid-last_sample.avg_centroid) < cfd_threshold*float(abs(lastPitch-note.pitch)+1)
                         elif wave.fret_mode != None:
@@ -72,7 +72,7 @@ def SampleSelector(note,pick_mode,fret_mode,lastPitch,wft,last_sample,samples_da
             
             #print(brightness_ok)
                 #list of tuples (sample.path,sample.start)
-            if (use_fallback==True and wave.fallback==True)or((not (wave.path,note.start) in bl)and (not wave.path in do_not_use ) and brightness_ok and ok == True and ((wave.fallback == False and use_fallback==False) or fullscope==None or noAtk ==True) and (wave.fallback == True or noAtk == False)):
+            if (use_fallback==True and wave.fallback==True and (not (wave.path,note.start) in bl))or((not (wave.path,note.start) in bl)and (not wave.path in do_not_use ) and brightness_ok and ok == True and ((wave.fallback == False and use_fallback==False) or fullscope==None or noAtk ==True) and (wave.fallback == True or noAtk == False)):
                 
                 #for finger sliding on notes
                 fretModeAccepted = False
@@ -116,7 +116,7 @@ def SampleSelector(note,pick_mode,fret_mode,lastPitch,wft,last_sample,samples_da
                 
                 #print(wave.pick_mode,pick_mode,wave.pitch,note.pitch,wave.path)
                 lenDif = abs(noteLen - wave.length)
-                if lenDif < bestLenDif and wave.pick_mode == pick_mode:
+                if lenDif < bestLenDif and wave.pick_mode == pick_mode and (not (wave.path,note.start) in bl):
                     bestLenDif = lenDif
                     wave.pitchchange = pitchdif
                     wave.newlength = wave.length
@@ -148,7 +148,7 @@ def SampleSelector(note,pick_mode,fret_mode,lastPitch,wft,last_sample,samples_da
                             wave.start=note.start
                             wave.end=note.end
 
-                            print(wave.adf0,wave.path)
+                            #print(wave.adf0,wave.path)
                             elem = wft[i]
                             do_not_use.append(elem.path)
                             #if pick_mode == 'mute':
@@ -197,10 +197,13 @@ def SampleSelector(note,pick_mode,fret_mode,lastPitch,wft,last_sample,samples_da
             reset=True
         else:
             #TODO: create some sort of fallback mechanism in case the thing truly cannot find a note
-            print('i had to settle for a shorter note :c')
-            note.end = note.start+bestWave.length
+            #print('i had to settle for a shorter note :c')
+            if note.start+bestWave.length<note.end:
+                note.end = note.start+bestWave.length
+            
             #bestWave.stretch=bestWave.length/noteLen
-            print(bestWave.path)
+            #print(bestWave.path)
+            bestWave.start=note.start
             return bestWave,wft,note,0,[]
         
         
