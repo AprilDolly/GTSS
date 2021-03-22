@@ -188,7 +188,8 @@ def main_gui(render_function,window_icon='assets/gtss.png'):
                     for i in range(1,num_tracks+1):
                         box_key='track{}inst'.format(i)
                         final_track_list.append(values[box_key])
-                    print(final_track_list)
+                    #print(final_track_list)
+                    #print('final_track_list: '.format(final_track_list))
                     if '' in final_track_list:
                         sg.Popup('One or more of your tracks does not have a designated instrument.',icon=window_icon)
                     else:
@@ -199,7 +200,7 @@ def main_gui(render_function,window_icon='assets/gtss.png'):
             elif event==None:
                 return
         inst_select_window.close()
-        
+        #print('final_track_list: {}'.format(final_track_list))
         config=initialize_config()
         ksw_table=config['ksw_table']
         reset_period=config['reset_period']
@@ -217,6 +218,7 @@ def main_gui(render_function,window_icon='assets/gtss.png'):
         while True:
             event,values=render_win.read(timeout=0.1)
             if started==False:
+                #print('final_track_list: {}'.format(final_track_list))
                 th=multiprocessing.Process(target=render_function,args=(midi_choice,final_track_list,ksw_table,reset_period,attack_cut,centroid_tolerance,pitch_shift))
                 th.start()
                 started=True
