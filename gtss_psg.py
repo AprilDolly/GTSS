@@ -44,7 +44,7 @@ def config_menu(window_icon='assets/gtss.png'):
     midi_range=list(range(128))
     def get_layout():
         layout=[
-            [sg.Text('Keyswitch notes (0-127)\nThese are to be changed depending on the plugin/soundfont you used.\nIgnore these if you used the included SFZ')],
+            [sg.Text('Keyswitch notes (0-127)\nThese are to be changed depending on the plugin/soundfont you used.\nIgnore these if you use fakeguitar, the SFZ also made by AprilDolly.')],
             [sg.Text('Open pluck:'),sg.Combo(midi_range,default_value=ksw_open,key='open')],
             [sg.Text('Muted pluck:'),sg.Combo(midi_range,default_value=ksw_mute,key='mute')],
             [sg.Text('Tap:'),sg.Combo(midi_range,default_value=ksw_tap,key='tap')],
