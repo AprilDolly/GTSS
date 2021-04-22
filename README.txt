@@ -17,6 +17,6 @@ These can be changed in the configuration menu.
 
 In addition to this, it also supports open power chords and mute power chords. 
 To program these in your midi file, just add 2 notes of equal length and position that are 7 half steps apart from one another.
-If you are confused about how this works, examine example.mid in your midi sequencer, and try to render a guitar track from it.
+If you are confused about how this works, examine example.mid in your midi sequencer/DAW, and try to render a guitar track from it.
 
 If you have any problems, send an email to aprildolly@mail.com or message u/aprildoll on Reddit.
