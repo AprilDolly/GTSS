@@ -10,6 +10,9 @@ GTSS (Guitar SuperSystem) is a tool that allows you to create somewhat realistic
 # Instructions (Windows):
 1) i have no idea how to get this to run on windows other than by manually installing all the python dependencies and rubberband-cli. someone help me pls
 
+# Instructions (Mac OS):
+1) no idea lol
+
 # Midi creation:
 GTSS currently supports 3 articulations: open plucking, palm mute plucking, and tapping.
 In order to use these, you must place keyswitch notes in your midi alongside the melodies that you create.
