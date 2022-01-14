@@ -2,16 +2,15 @@
 
 GTSS (Guitar SuperSystem) is a tool that allows you to create somewhat realistic-sounding guitar tracks from midi files.
 
-# Instructions (Linux):
-1) Download and extract the repository or use git clone https://github.com/AprilDolly/GTSS.git
-2) Run 'gtss' to launch GTSS.
-3) Load up your midi, select the instruments you want to render from your midi, and start rendering!
+# Installation:
+1) [Download the latest release here.](https://github.com/AprilDolly/GTSS/releases/tag/V2.0)
+2) Extract it, keep gtss-x86_64.AppImage in the same directory as the guitar_samples directory if you decide to move it somewhere else.
 
-# Instructions (Windows):
-1) i have no idea how to get this to run on windows other than by manually installing all the python dependencies and rubberband-cli. someone help me pls
-
-# Instructions (Mac OS):
-1) no idea lol
+# Instructions
+1) Run gtss-x86_64.AppImage
+2) Load your rendered midi file
+3) Select the number of guitar tracks to render, and the midi instruments to read notes from for each track.
+4) Render and wait for it to complete. Each track will be rendered as a .wav file in the same directory as your midi file.
 
 # Midi creation:
 GTSS currently supports 3 articulations: open plucking, palm mute plucking, and tapping.
@@ -22,3 +21,6 @@ Note 1: mute
 Note 3: tap
 These can be changed in the configuration menu.
 If you are confused about how this works, examine example.mid in your midi sequencer, and try to render a guitar track from it.
+
+# Configuration:
+- 
