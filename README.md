@@ -14,11 +14,11 @@ GTSS (Guitar SuperSystem) is a tool that allows you to create somewhat realistic
 
 ### Midi creation
 GTSS currently supports 3 articulations: open plucking, palm mute plucking, and tapping.
-In order to use these, you must place keyswitch notes in your midi alongside the melodies that you create.
+In order to use these, you must place keyswitch notes in your midi alongside the melodies that you create.<br>
 The default keyswitches are:
-Note 0: open
-Note 1: mute
-Note 3: tap
+- Note 0: open
+- Note 1: mute
+- Note 3: tap
 These can be changed in the configuration menu.
 If you are confused about how this works, examine example.mid in your midi sequencer, and try to render a guitar track from it.
 
