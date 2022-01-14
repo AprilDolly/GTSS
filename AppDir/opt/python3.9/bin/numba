@@ -1,0 +1,9 @@
+#! /bin/sh
+"exec" "$(dirname $(readlink -f ${0}))/../../../usr/bin/python3.9" "$0" "$@"
+# -*- coding: UTF-8 -*-
+from __future__ import print_function, division, absolute_import
+
+from numba.misc.numba_entry import main
+
+if __name__ == "__main__":
+    main()

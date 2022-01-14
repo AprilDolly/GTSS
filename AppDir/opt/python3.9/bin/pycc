@@ -1,0 +1,4 @@
+#! /bin/sh
+"exec" "$(dirname $(readlink -f ${0}))/../../../usr/bin/python3.9" "$0" "$@"
+from numba.pycc import main
+main()
