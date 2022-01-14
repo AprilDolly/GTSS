@@ -8,7 +8,7 @@ GTSS (Guitar SuperSystem) is a tool that allows you to create somewhat realistic
 3) Load up your midi, select the instruments you want to render from your midi, and start rendering!
 
 # Instructions (Windows):
-1) i have no idea how to get this to run on windows other than by manually installing all the python dependencies and rubberband-cli
+1) i have no idea how to get this to run on windows other than by manually installing all the python dependencies and rubberband-cli. someone help me pls
 
 # Midi creation:
 GTSS currently supports 3 articulations: open plucking, palm mute plucking, and tapping.
