@@ -2,7 +2,7 @@
 
 GTSS (Guitar SuperSystem) is a tool that allows you to create somewhat realistic-sounding guitar tracks from midi files. It is mainly optimized for metal guitar playing, so it may not sound as natural through a clean amp.
 
-### Installation
+### Installation (Linux only)
 1) [Download the latest release here.](https://github.com/AprilDolly/GTSS/releases/tag/V2.0)
 2) Extract it, keep gtss-x86_64.AppImage in the same directory as the guitar_samples directory if you decide to move it somewhere else.
 
